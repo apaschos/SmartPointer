@@ -220,3 +220,51 @@ private:
 
 	T* p_;
 };
+
+template <typename T>
+class WeakPointer
+{
+public:
+	WeakPointer(const SharedPointer<T> sp)
+	{
+		p_ = sp.data();
+	}
+
+	T* data() const
+	{
+		return p_;
+	}
+
+	WeakPointer(const WeakPointer& other)
+		: p_(other.p_)
+	{
+	}
+
+	WeakPointer(WeakPointer&& other)
+		: p_(other.p_)
+	{
+		other.p_ = nullptr;
+	}
+
+	WeakPointer& operator=(const WeakPointer& other)
+	{
+		if (other != *this)
+		{
+			p_ = other.p_;
+		}
+
+		return *this;
+	}
+
+	WeakPointer& operator=(WeakPointer&& other)
+	{
+		p_ = other.p_;
+		other.p_ = nullptr;
+
+		return *this;
+	}
+
+private:
+
+	T* p_;
+};
