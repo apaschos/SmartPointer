@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <stdexcept>
 #include <cassert>
 
@@ -7,9 +8,19 @@ template <typename T>
 class SharedPointer
 {
 public:
+	enum TYPE
+	{
+		DEFAULT,
+		COPY_CONSTR,
+		MOVE_CONSTR,
+	};
+
+
 	SharedPointer(T* p)
 		: p_(p)
+		, type_(DEFAULT)
 	{
+		std::cout << "SharedPointer()" << std::endl;
 		if (p_ == nullptr)
 		{
 			throw std::invalid_argument("Nullptr not allowed");
@@ -21,14 +32,18 @@ public:
 	SharedPointer(const SharedPointer& other)
 		: p_(other.p_)
 		, ref_(other.ref_)
+		, type_(COPY_CONSTR)
 	{
+		std::cout << "SharedPointer(&)" << std::endl;
 		inc();
 	}
 
 	SharedPointer(SharedPointer&& other)
 		: p_(other.p_)
 		, ref_(other.ref_)
+		, type_(MOVE_CONSTR)
 	{
+		std::cout << "SharedPointer(&&)" << std::endl;
 
 		other.p_ = nullptr;
 		other.ref_ = nullptr;
@@ -36,6 +51,7 @@ public:
 
 	~SharedPointer()
 	{
+		std::cout << "~SharedPointer (" << type() << ")" << std::endl;
 		dec();
 	}
 
@@ -88,16 +104,41 @@ public:
 		return p_;
 	}
 
+	std::string type() const
+	{
+		if (type_ == DEFAULT)
+		{
+			return "default";
+		}
+		else if (type_ == COPY_CONSTR)
+		{
+			return "copy constructor";
+		}
+		else if (type_ == MOVE_CONSTR)
+		{
+			return "move constructor";
+		}
+		else
+		{
+			return "unknown";
+		}
+	}
+
 
 private:
 	void dec()
 	{
 		if (ref_ == nullptr)
 		{
+			std::cout << "already deleted" << std::endl;
 			return;
 		}
 
-		if (--(*ref_) == 0)
+		std::cout << "dec: " << (*ref_) << "->";
+		--(*ref_);
+		std::cout << (*ref_) << std::endl;
+
+		if (*ref_ == 0)
 		{
 			delete ref_;
 			delete p_;
@@ -111,9 +152,12 @@ private:
 			return;
 		}
 
+		std::cout << "inc: " << (*ref_) << "->";
 		++(*ref_);
+		std::cout << (*ref_) << std::endl;
 	}
 
 	T* p_;
 	int* ref_;
+	TYPE type_;
 };
