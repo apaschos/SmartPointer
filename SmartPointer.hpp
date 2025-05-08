@@ -161,3 +161,62 @@ private:
 	int* ref_;
 	TYPE type_;
 };
+
+
+template <typename T>
+class UniquePointer
+{
+public:
+	UniquePointer(T* p)
+		: p_(p)
+	{
+		if (p_ == nullptr)
+		{
+			throw;
+		}
+	}
+
+	UniquePointer(UniquePointer&& other)
+		: p_(other.p_)
+	{
+		other.p_ = nullptr;
+	}
+
+	UniquePointer& operator=(UniquePointer&& other)
+	{
+		p_ = other.p_;
+		other.p_ = nullptr;
+
+		return this;
+	}
+
+	~UniquePointer()
+	{
+		if (p_ != nullptr)
+		{
+			delete p_;
+		}
+	}
+
+	T operator*() const
+	{
+		return val();
+	}
+
+	T val() const
+	{
+		assert(p_ != nullptr);
+		return *p_;
+	}
+
+	T* data() const
+	{
+		return p_;
+	}
+
+private:
+	UniquePointer(const UniquePointer& other) = delete;
+	UniquePointer& operator=(const UniquePointer& other) = delete;
+
+	T* p_;
+};
