@@ -1,0 +1,9 @@
+x64/
+.vs/
+build/
+*.vcxproj*
+*.obj
+*.idb
+*.ilk
+*.recipe
+*.tlog
